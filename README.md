@@ -5,7 +5,7 @@ with one exception in that the internally-used-in-some-cases HeapSort algorithm 
 
 Basic usage is roughly as follows:
 
-``Pascal
+```Pascal
 program Example;
 
 {$mode ObjFPC}
@@ -30,6 +30,6 @@ begin
     A[I] := RandomRange(1, 1001);
   Int32Sorter.Sort(A, Int32LessThan);
 end.
-``
+```
 
 Compatible with Free Pascal 3.1.1 and higher.
