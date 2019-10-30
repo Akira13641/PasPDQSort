@@ -28,7 +28,7 @@ begin
   SetLength(A, 500);
   for I := 0 to 499 do
     A[I] := RandomRange(1, 1001);
-  Int32Sorter.Sort(A, Int32LessThan);
+  Int32Sorter.Sort(A, @Int32LessThan);
 end.
 ```
 
