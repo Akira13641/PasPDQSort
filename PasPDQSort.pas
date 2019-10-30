@@ -23,7 +23,6 @@ type
   end;
 
   Util<T> = record
-  public
     class function PreInc(var P: T): T; static; inline;
     class function PostInc(var P: T): T; static; inline;
     class function PreDec(var P: T): T; static; inline;
