@@ -43,26 +43,26 @@ type
   strict private
     class procedure Swap(const L, R: PT); static; inline;
     class procedure Sort3(const A, B, C: PT; const IsLess: TIsLess); static; inline;
-    class procedure InsertionSort(const _Begin, _End: PT; const IsLess: TIsLess); static;
-    class procedure UnguardedInsertionSort(const _Begin, _End: PT; const IsLess: TIsLess); static;
-    class function PartialInsertionSort(const _Begin, _End: PT; const IsLess: TIsLess): Boolean; static;
-    class procedure HeapSort(const _Begin, _End: PT; const IsLess: TIsLess); static;
+    class procedure InsertionSort(const Start, Finish: PT; const IsLess: TIsLess); static;
+    class procedure UnguardedInsertionSort(const Start, Finish: PT; const IsLess: TIsLess); static;
+    class function PartialInsertionSort(const Start, Finish: PT; const IsLess: TIsLess): Boolean; static;
+    class procedure HeapSort(const Start, Finish: PT; const IsLess: TIsLess); static;
     class procedure SwapOffsets(const First, Last: PT;
                                 const OffsetsL, OffsetsR: PByte;
                                 const Num: PtrUInt;
                                 const UseSwaps: Boolean); static;
-    class function PartitionRightBranchless(const _Begin, _End: PT; const IsLess: TIsLess): TPair<PT, Boolean>; static;
-    class function PartitionRight(const _Begin, _End: PT; const IsLess: TIsLess): TPair<PT, Boolean>; static;
-    class function PartitionLeft(const _Begin, _End: PT; const IsLess: TIsLess): PT; static;
-    class procedure PDQSortLoop(var _Begin: PT;
-                                const _End: PT;
+    class function PartitionRightBranchless(const Start, Finish: PT; const IsLess: TIsLess): TPair<PT, Boolean>; static;
+    class function PartitionRight(const Start, Finish: PT; const IsLess: TIsLess): TPair<PT, Boolean>; static;
+    class function PartitionLeft(const Start, Finish: PT; const IsLess: TIsLess): PT; static;
+    class procedure PDQSortLoop(var Start: PT;
+                                const Finish: PT;
                                 const IsLess: TIsLess;
                                 BadAllowed: PtrInt;
                                 LeftMost: Boolean = True;
                                 const Branchless: Boolean = True); static;
   public
-    class procedure Sort(_Begin: PT;
-                         const _End: PT;
+    class procedure Sort(Start: PT;
+                         const Finish: PT;
                          const IsLess: TIsLess;
                          const Branchless: Boolean = True); static; inline; overload;
     class procedure Sort(constref Arr: array of T;
@@ -138,35 +138,35 @@ begin
   if IsLess(B^, A^) then Swap(A, B);
 end;
 
-class procedure TPDQSorter<T>.InsertionSort(const _Begin, _End: PT; const IsLess: TIsLess);
+class procedure TPDQSorter<T>.InsertionSort(const Start, Finish: PT; const IsLess: TIsLess);
 var
   Tmp: T;
   Cur, Sift, SiftL: PT;
 begin
-  if _Begin = _End then Exit();
-  Cur := _Begin + 1;
-  while Cur <> _End do begin
+  if Start = Finish then Exit();
+  Cur := Start + 1;
+  while Cur <> Finish do begin
     Sift := Cur;
     SiftL := Cur - 1;
     if IsLess(Sift^, SiftL^) then begin
       Tmp := Sift^;
       repeat
         PtrUtil.PostDec(Sift)^ := SiftL^;
-      until (Sift = _Begin) or not IsLess(Tmp, PtrUtil.PreDec(SiftL)^);
+      until (Sift = Start) or not IsLess(Tmp, PtrUtil.PreDec(SiftL)^);
       Sift^ := Tmp;
     end;
     Cur += 1;
   end;
 end;
 
-class procedure TPDQSorter<T>.UnguardedInsertionSort(const _Begin, _End: PT; const IsLess: TIsLess);
+class procedure TPDQSorter<T>.UnguardedInsertionSort(const Start, Finish: PT; const IsLess: TIsLess);
 var
   Tmp: T;
   Cur, Sift, SiftL: PT;
 begin
-  if _Begin = _End then Exit();
-  Cur := _Begin + 1;
-  while Cur <> _End do begin
+  if Start = Finish then Exit();
+  Cur := Start + 1;
+  while Cur <> Finish do begin
     Sift := Cur;
     SiftL := Cur - 1;
     if IsLess(Sift^, SiftL^) then begin
@@ -180,16 +180,16 @@ begin
   end;
 end;
 
-class function TPDQSorter<T>.PartialInsertionSort(const _Begin, _End: PT; const IsLess: TIsLess): Boolean;
+class function TPDQSorter<T>.PartialInsertionSort(const Start, Finish: PT; const IsLess: TIsLess): Boolean;
 var
   Limit: PtrUInt;
   Tmp: T;
   Cur, Sift, SiftL: PT;
 begin
-  if _Begin = _End then Exit(True);
+  if Start = Finish then Exit(True);
   Limit := 0;
-  Cur := _Begin + 1;
-  while Cur <> _End do begin
+  Cur := Start + 1;
+  while Cur <> Finish do begin
     if Limit > PARTIAL_INSERTION_SORT_LIMIT then Exit(False);
     Sift := Cur;
     SiftL := Cur - 1;
@@ -197,7 +197,7 @@ begin
       Tmp := Sift^;
       repeat
         PtrUtil.PostDec(Sift)^ := SiftL^;
-      until (Sift = _Begin) or not IsLess(Tmp, PtrUtil.PreDec(SiftL)^);
+      until (Sift = Start) or not IsLess(Tmp, PtrUtil.PreDec(SiftL)^);
       Sift^ := Tmp;
       Limit += Cur - Sift;
     end;
@@ -206,34 +206,34 @@ begin
   Result := True;
 end;
 
-class procedure TPDQSorter<T>.HeapSort(const _Begin, _End: PT; const IsLess: TIsLess);
+class procedure TPDQSorter<T>.HeapSort(const Start, Finish: PT; const IsLess: TIsLess);
 var
   I, OuterLen: PtrUInt;
 
-  procedure SiftDown(const _Begin2: PT; const InnerLen: PtrUInt; Node: PtrUInt); inline;
+  procedure SiftDown(const Start2: PT; const InnerLen: PtrUInt; Node: PtrUInt); inline;
   var Left, Right, Greater: PtrUInt;
   begin
     while True do begin
       Left := 2 * Node + 1;
       Right := 2 * Node + 2;
-      if (Right < InnerLen) and IsLess(_Begin2[Left], _Begin2[Right]) then
+      if (Right < InnerLen) and IsLess(Start2[Left], Start2[Right]) then
         Greater := Right
       else
         Greater := Left;
-      if (Greater >= InnerLen) or not IsLess(_Begin2[Node], _Begin2[Greater]) then
+      if (Greater >= InnerLen) or not IsLess(Start2[Node], Start2[Greater]) then
         Break;
-      Swap(@_Begin2[Node], @_Begin2[Greater]);
+      Swap(@Start2[Node], @Start2[Greater]);
       Node := Greater;
     end;
   end;
 
 begin
-  OuterLen := (_End - _Begin) + 1;
+  OuterLen := (Finish - Start) + 1;
   for I := OuterLen div 2 - 1 downto 0 do
-    SiftDown(_Begin, OuterLen, I);
+    SiftDown(Start, OuterLen, I);
   for I := OuterLen - 1 downto 1 do begin
-    Swap(_Begin, @_Begin[I]);
-    SiftDown(_Begin, I, 0);
+    Swap(Start, @Start[I]);
+    SiftDown(Start, I, 0);
   end;
 end;
 
@@ -267,7 +267,7 @@ begin
   end;
 end;
 
-class function TPDQSorter<T>.PartitionRightBranchless(const _Begin, _End: PT; const IsLess: TIsLess): TPair<PT, Boolean>;
+class function TPDQSorter<T>.PartitionRightBranchless(const Start, Finish: PT; const IsLess: TIsLess): TPair<PT, Boolean>;
 var
   I: Byte;
   AlreadyPartitioned: Boolean;
@@ -277,12 +277,12 @@ var
   Num, NumL, NumR, StartL, StartR, LSize, RSize, UnknownLeft: PtrInt;
   OffsetsLStorage, OffsetsRStorage: array[0..Pred(BLOCK_SIZE + CACHE_LINE_SIZE)] of Byte;
 begin
-  Pivot := _Begin^;
-  First := _Begin;
-  Last := _End;
+  Pivot := Start^;
+  First := Start;
+  Last := Finish;
   while IsLess(PtrUtil.PreInc(First)^, Pivot) do
     ;
-  if First - 1 = _Begin then begin
+  if First - 1 = Start then begin
     while (First < Last) and not IsLess(PtrUtil.PreDec(Last)^, Pivot) do
       ;
   end else
@@ -425,23 +425,23 @@ begin
     Last := First;
   end;
   PivotPos := First - 1;
-  _Begin^ := PivotPos^;
+  Start^ := PivotPos^;
   PivotPos^ := Pivot;
   Result := TPair<PT, Boolean>.Create(PivotPos, AlreadyPartitioned);
 end;
 
-class function TPDQSorter<T>.PartitionRight(const _Begin, _End: PT; const IsLess: TIsLess): TPair<PT, Boolean>;
+class function TPDQSorter<T>.PartitionRight(const Start, Finish: PT; const IsLess: TIsLess): TPair<PT, Boolean>;
 var
   AlreadyPartitioned: Boolean;
   Pivot: T;
   First, Last, PivotPos: PT;
 begin
-  Pivot := _Begin^;
-  First := _Begin;
-  Last := _End;
+  Pivot := Start^;
+  First := Start;
+  Last := Finish;
   while IsLess(PtrUtil.PreInc(First)^, Pivot) do
     ;
-  if First - 1 = _Begin then begin
+  if First - 1 = Start then begin
     while (First < Last) and not IsLess(PtrUtil.PreDec(Last)^, Pivot) do
       ;
   end else
@@ -456,22 +456,22 @@ begin
       ;
   end;
   PivotPos := First - 1;
-  _Begin^ := PivotPos^;
+  Start^ := PivotPos^;
   PivotPos^ := Pivot;
   Result := TPair<PT, Boolean>.Create(PivotPos, AlreadyPartitioned);
 end;
 
-class function TPDQSorter<T>.PartitionLeft(const _Begin, _End: PT; const IsLess: TIsLess): PT;
+class function TPDQSorter<T>.PartitionLeft(const Start, Finish: PT; const IsLess: TIsLess): PT;
 var
   Pivot: T;
   First, Last, PivotPos: PT;
 begin
-  Pivot := _Begin^;
-  First := _Begin;
-  Last := _End;
+  Pivot := Start^;
+  First := Start;
+  Last := Finish;
   while IsLess(Pivot, PtrUtil.PreDec(Last)^) do
     ;
-  if Last + 1 = _End then begin
+  if Last + 1 = Finish then begin
     while (First < Last) and not IsLess(Pivot, PtrUtil.PreInc(First)^) do
       ;
   end else
@@ -485,13 +485,13 @@ begin
       ;
   end;
   PivotPos := Last;
-  _Begin^ := PivotPos^;
+  Start^ := PivotPos^;
   PivotPos^ := Pivot;
   Result := PivotPos;
 end;
 
-class procedure TPDQSorter<T>.PDQSortLoop(var _Begin: PT;
-                                          const _End: PT;
+class procedure TPDQSorter<T>.PDQSortLoop(var Start: PT;
+                                          const Finish: PT;
                                           const IsLess: TIsLess;
                                           BadAllowed: PtrInt;
                                           LeftMost: Boolean;
@@ -503,77 +503,77 @@ var
   PartResult: TPair<PT, Boolean>;
 begin
   while True do begin
-    Size := _End - _Begin;
+    Size := Finish - Start;
     if Size < INSERTION_SORT_THRESHOLD then begin
       if LeftMost then
-        InsertionSort(_Begin, _End, IsLess)
+        InsertionSort(Start, Finish, IsLess)
       else
-        UnguardedInsertionSort(_Begin, _End, IsLess);
+        UnguardedInsertionSort(Start, Finish, IsLess);
       Exit();
     end;
     S2 := Size div 2;
     if Size > NINTHER_THRESHOLD then begin
-      Sort3(_Begin, _Begin + S2, _End - 1, IsLess);
-      Sort3(_Begin + 1, _Begin + (S2 - 1), _End - 2, IsLess);
-      Sort3(_Begin + 2, _Begin + (S2 + 1), _End - 3, IsLess);
-      Sort3(_Begin + (S2 - 1), _Begin + S2, _Begin + (S2 + 1), IsLess);
-      Swap(_Begin, _Begin + S2);
+      Sort3(Start, Start + S2, Finish - 1, IsLess);
+      Sort3(Start + 1, Start + (S2 - 1), Finish - 2, IsLess);
+      Sort3(Start + 2, Start + (S2 + 1), Finish - 3, IsLess);
+      Sort3(Start + (S2 - 1), Start + S2, Start + (S2 + 1), IsLess);
+      Swap(Start, Start + S2);
     end else
-      Sort3(_Begin + S2, _Begin, _End - 1, IsLess);
-    if (not LeftMost) and (not IsLess((_Begin - 1)^, _Begin^)) then begin
-      _Begin := PartitionLeft(_Begin, _End, IsLess) + 1;
+      Sort3(Start + S2, Start, Finish - 1, IsLess);
+    if (not LeftMost) and (not IsLess((Start - 1)^, Start^)) then begin
+      Start := PartitionLeft(Start, Finish, IsLess) + 1;
       Continue;
     end;
     if Branchless then
-      PartResult := PartitionRightBranchless(_Begin, _End, IsLess)
+      PartResult := PartitionRightBranchless(Start, Finish, IsLess)
     else
-      PartResult := PartitionRight(_Begin, _End, IsLess);
+      PartResult := PartitionRight(Start, Finish, IsLess);
     PivotPos := PartResult.Key;
     AlreadyPartitioned := PartResult.Value;
-    LSize := PivotPos - _Begin;
-    RSize := _End - (PivotPos + 1);
+    LSize := PivotPos - Start;
+    RSize := Finish - (PivotPos + 1);
     HighlyUnbalanced := (LSize < Size div 8) or (RSize < Size div 8);
     if HighlyUnbalanced then begin
       if IntUtil.PreDec(BadAllowed) = 0 then begin
-        HeapSort(_Begin, _End, IsLess);
+        HeapSort(Start, Finish, IsLess);
         Exit();
       end;
       if LSize >= INSERTION_SORT_THRESHOLD then begin
-        Swap(_Begin, _Begin + LSize div 4);
+        Swap(Start, Start + LSize div 4);
         Swap(PivotPos - 1, PivotPos - LSize div 4);
         if LSize > NINTHER_THRESHOLD then begin
-          Swap(_Begin + 1, _Begin + (LSize div 4 + 1));
-          Swap(_Begin + 2, _Begin + (LSize div 4 + 2));
+          Swap(Start + 1, Start + (LSize div 4 + 1));
+          Swap(Start + 2, Start + (LSize div 4 + 2));
           Swap(PivotPos - 2, PivotPos - (LSize div 4 + 1));
           Swap(PivotPos - 3, PivotPos - (LSize div 4 + 2));
         end;
       end;
       if RSize >= INSERTION_SORT_THRESHOLD then begin
         Swap(PivotPos + 1, PivotPos + (1 + RSize div 4));
-        Swap(_End - 1, _End - RSize div 4);
+        Swap(Finish - 1, Finish - RSize div 4);
         if RSize > NINTHER_THRESHOLD then begin
           Swap(PivotPos + 2, PivotPos + (2 + RSize div 4));
           Swap(PivotPos + 3, PivotPos + (3 + RSize div 4));
-          Swap(_End - 2, _End - (1 + RSize div 4));
-          Swap(_End - 3, _End - (2 + RSize div 4));
+          Swap(Finish - 2, Finish - (1 + RSize div 4));
+          Swap(Finish - 3, Finish - (2 + RSize div 4));
         end;
       end;
     end else begin
       if (AlreadyPartitioned and
-          PartialInsertionSort(_Begin, PivotPos, IsLess) and
-          PartialInsertionSort(PivotPos + 1, _End, IsLess)) then
+          PartialInsertionSort(Start, PivotPos, IsLess) and
+          PartialInsertionSort(PivotPos + 1, Finish, IsLess)) then
         Exit();
     end;
-    PDQSortLoop(_Begin, PivotPos, IsLess, BadAllowed, LeftMost, Branchless);
-    _Begin := PivotPos + 1;
+    PDQSortLoop(Start, PivotPos, IsLess, BadAllowed, LeftMost, Branchless);
+    Start := PivotPos + 1;
     LeftMost := False;
   end;
 end;
 
-class procedure TPDQSorter<T>.Sort(_Begin: PT; const _End: PT; const IsLess: TIsLess; const Branchless: Boolean);
+class procedure TPDQSorter<T>.Sort(Start: PT; const Finish: PT; const IsLess: TIsLess; const Branchless: Boolean);
 begin
-  if _Begin = _End then Exit();
-  PDQSortLoop(_Begin, _End, IsLess, BSRQWord(_End - _Begin) + 1, True, Branchless);
+  if Start = Finish then Exit();
+  PDQSortLoop(Start, Finish, IsLess, BSRQWord(Finish - Start) + 1, True, Branchless);
 end;
 
 class procedure TPDQSorter<T>.Sort(constref Arr: array of T; const IsLess: TIsLess; const Branchless: Boolean);
