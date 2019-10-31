@@ -143,7 +143,7 @@ var
   Tmp: T;
   Cur, Sift, SiftL: PT;
 begin
-  if _Begin = _End then Exit;
+  if _Begin = _End then Exit();
   Cur := _Begin + 1;
   while Cur <> _End do begin
     Sift := Cur;
@@ -164,7 +164,7 @@ var
   Tmp: T;
   Cur, Sift, SiftL: PT;
 begin
-  if _Begin = _End then Exit;
+  if _Begin = _End then Exit();
   Cur := _Begin + 1;
   while Cur <> _End do begin
     Sift := Cur;
@@ -509,7 +509,7 @@ begin
         InsertionSort(_Begin, _End, IsLess)
       else
         UnguardedInsertionSort(_Begin, _End, IsLess);
-      Exit;
+      Exit();
     end;
     S2 := Size div 2;
     if Size > NINTHER_THRESHOLD then begin
@@ -536,7 +536,7 @@ begin
     if HighlyUnbalanced then begin
       if IntUtil.PreDec(BadAllowed) = 0 then begin
         HeapSort(_Begin, _End, IsLess);
-        Exit;
+        Exit();
       end;
       if LSize >= INSERTION_SORT_THRESHOLD then begin
         Swap(_Begin, _Begin + LSize div 4);
@@ -562,17 +562,17 @@ begin
       if (AlreadyPartitioned and
           PartialInsertionSort(_Begin, PivotPos, IsLess) and
           PartialInsertionSort(PivotPos + 1, _End, IsLess)) then
-        Exit;
+        Exit();
     end;
     PDQSortLoop(_Begin, PivotPos, IsLess, BadAllowed, LeftMost, Branchless);
     _Begin := PivotPos + 1;
-    LeftMost := false;
+    LeftMost := False;
   end;
 end;
 
 class procedure TPDQSorter<T>.Sort(_Begin: PT; const _End: PT; const IsLess: TIsLess; const Branchless: Boolean);
 begin
-  if _Begin = _End then Exit;
+  if _Begin = _End then Exit();
   PDQSortLoop(_Begin, _End, IsLess, BSRQWord(_End - _Begin) + 1, True, Branchless);
 end;
 
