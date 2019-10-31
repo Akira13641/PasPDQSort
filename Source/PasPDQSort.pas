@@ -222,7 +222,7 @@ var
         Greater := Left;
       if (Greater >= InnerLen) or not IsLess(Start2[Node], Start2[Greater]) then
         Break;
-      Swap(@Start2[Node], @Start2[Greater]);
+      Swap(Start2 + Node, Start2 + Greater);
       Node := Greater;
     end;
   end;
@@ -232,7 +232,7 @@ begin
   for I := OuterLen div 2 - 1 downto 0 do
     SiftDown(Start, OuterLen, I);
   for I := OuterLen - 1 downto 1 do begin
-    Swap(Start, @Start[I]);
+    Swap(Start, Start + I);
     SiftDown(Start, I, 0);
   end;
 end;
@@ -370,7 +370,7 @@ begin
   if (NumR or NumL) <> 0 then
     UnknownLeft := (Last - First) - BLOCK_SIZE
   else
-    UnknownLeft := (Last - First);
+    UnknownLeft := Last - First;
   if NumR <> 0 then begin
     LSize := UnknownLeft;
     RSize := BLOCK_SIZE;
@@ -412,13 +412,16 @@ begin
     Last -= RSize;
   if NumL <> 0 then begin
     OffsetsL += StartL;
-    while IntUtil.PostDec(NumL) <> 0 do
+    while NumL <> 0 do begin
+      NumL -= 1;
       Swap(First + OffsetsL[NumL], PtrUtil.PreDec(Last));
+    end;
     First := Last;
   end;
   if NumR <> 0 then begin
     OffsetsR += StartR;
-    while IntUtil.PostDec(NumR) <> 0 do begin
+    while NumR <> 0 do begin
+      NumR -= 1;
       Swap(Last - OffsetsR[NumR], First);
       First += 1;
     end;
