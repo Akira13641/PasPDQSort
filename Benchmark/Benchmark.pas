@@ -58,21 +58,24 @@ begin
   Randomize();
 
   SetLength(A, 100000000);
-  for I := 0 to 99999999 do A[I] := TVec4.Create(RandomRange(1, 200000001), RandomRange(1, 200000001), RandomRange(1, 200000001), RandomRange(1, 200000001));
+  for I := 0 to 99999999 do A[I] := TVec4.Create(RandomRange(1, 200000001), RandomRange(1, 200000001),
+                                                 RandomRange(1, 200000001), RandomRange(1, 200000001));
   T1 := Now();
   TPDQSorter<TVec4>.Sort(A, Vec4Less);
   WriteLn('PDQSort: ', MillisecondsBetween(Now(), T1) / 1000 : 0 : 4);
   SetLength(A, 0);
 
   SetLength(B, 100000000);
-  for I := 0 to 99999999 do B[I] := TVec4.Create(RandomRange(1, 200000001), RandomRange(1, 200000001), RandomRange(1, 200000001), RandomRange(1, 200000001));
+  for I := 0 to 99999999 do B[I] := TVec4.Create(RandomRange(1, 200000001), RandomRange(1, 200000001),
+                                                 RandomRange(1, 200000001), RandomRange(1, 200000001));
   T2 := Now();
   TArrayHelper<TVec4>.Sort(B, TComparer<TVec4>.Construct(Vec4OrderTyped));
   WriteLn('RTL-Generics QuickSort: ', MillisecondsBetween(Now(), T2) / 1000 : 0 : 4);
   SetLength(B, 0);
 
   SetLength(C, 100000000);
-  for I := 0 to 99999999 do C[I] := TVec4.Create(RandomRange(1, 200000001), RandomRange(1, 200000001), RandomRange(1, 200000001), RandomRange(1, 200000001));
+  for I := 0 to 99999999 do C[I] := TVec4.Create(RandomRange(1, 200000001), RandomRange(1, 200000001),
+                                                 RandomRange(1, 200000001), RandomRange(1, 200000001));
   T3 := Now();
   QuickSort_ItemList_Context(@C[0], 100000000, SizeOf(TVec4), Vec4OrderUntyped, nil);
   WriteLn('SortBase QuickSort: ', MillisecondsBetween(Now(), T3) / 1000 : 0 : 4);
