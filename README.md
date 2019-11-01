@@ -3,7 +3,7 @@ This is a direct translation of Orson Peters' [PDQSort](https://github.com/orlp/
 with one difference in that the internally-used-in-some-cases HeapSort algorithm is a translation of the one found in Stjepan Glavina's
 [Rust implementation](https://github.com/stjepang/pdqsort) of PDQSort.
 
-Basic usage is as follows:
+Basic usage (in the ObjFPC syntax mode) is as follows:
 
 ```Pascal
 program Example;
@@ -11,8 +11,6 @@ program Example;
 {$mode ObjFPC}
 
 uses Math, PasPDQSort;
-
-type Int32Sorter = specialize TPDQSorter<Int32>;
 
 function Int32LessThan(constref A, B: Int32): Boolean;
 begin
@@ -24,14 +22,14 @@ var
   A: array of Int32;
 
 begin
-  // generate a random array for example purposes
+  // generate a random array for example purposes.
   Randomize();
   SetLength(A, 500);
   for I := 0 to 499 do
     A[I] := RandomRange(1, 1001);
 
   // sort it!
-  Int32Sorter.Sort(A, @Int32LessThan);
+  specialize TPDQSorter<Int32>.Sort(A, @Int32LessThan);
 end.
 ```
 
