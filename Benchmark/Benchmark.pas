@@ -3,21 +3,12 @@ program Benchmark;
 {$mode Delphi}
 {$ImplicitExceptions Off}
 
-uses SysUtils, DateUtils, Math, Generics.Defaults, Generics.Collections, SortBase, PasPDQSort, LGArrayHelpers;
+uses SysUtils, DateUtils, Math, Generics.Defaults, Generics.Collections, SortBase, PasPDQSort;
 
 type
   TVec4 = record
     X, Y, Z, W: Double;
-    class operator LessThan(constref A, B: TVec4): Boolean;
     class function Create(const IX, IY, IZ, IW: Double): TVec4; static; inline;
-  end;
-
-  class operator TVec4.LessThan(constref A, B: TVec4): Boolean;
-  var ASum, BSum: Double;
-  begin
-    with A do ASum := X + Y + Z + W;
-    with B do BSum := X + Y + Z + W;
-    Result := ASum < BSum;
   end;
 
   class function TVec4.Create(const IX, IY, IZ, IW: Double): TVec4;
@@ -48,16 +39,6 @@ type
     else Result := 1;
   end;
 
-  function Vec4OrderTyped2(constref A, B: TVec4): SizeInt;
-  var ASum, BSum: Double;
-  begin
-    with A do ASum := X + Y + Z + W;
-    with B do BSum := X + Y + Z + W;
-    if ASum < BSum then Result := -1
-    else if ASum = BSum then Result := 0
-    else Result := 1;
-  end;
-
   function Vec4OrderUntyped(Item1, Item2, Context: Pointer): Int32;
   var ASum, BSum: Double;
   begin
@@ -70,8 +51,8 @@ type
 
 var
   I: PtrUInt;
-  T1, T2, T3, T4: TDateTime;
-  A, B, C, D: array of TVec4;
+  T1, T2, T3: TDateTime;
+  A, B, C: array of TVec4;
 
 begin
   Randomize();
@@ -99,12 +80,4 @@ begin
   QuickSort_ItemList_Context(@C[0], 25000000, SizeOf(TVec4), Vec4OrderUntyped, nil);
   WriteLn('SortBase QuickSort: ', MillisecondsBetween(Now(), T3) / 1000 : 0 : 4);
   SetLength(C, 0);
-
-  SetLength(D, 25000000);
-  for I := 0 to 24999999 do D[I] := TVec4.Create(RandomRange(1, 50000001), RandomRange(1, 50000001),
-                                                 RandomRange(1, 50000001), RandomRange(1, 50000001));
-  T4 := Now();
-  TGRegularArrayHelper<TVec4>.Sort(D, Vec4OrderTyped2);
-  WriteLn('LGenerics Sort: ', MillisecondsBetween(Now(), T4) / 1000 : 0 : 4);
-  SetLength(D, 0);
 end.
