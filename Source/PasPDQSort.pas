@@ -502,7 +502,7 @@ class procedure TPDQSorter<T>.PDQSortLoop(var Start: PT;
 var
   AlreadyPartitioned, HighlyUnbalanced: Boolean;
   PivotPos: PT;
-  Size, S2, LSize, RSize: PtrInt;
+  Size, S2, LSize, LSizeDiv, RSize, RSizeDiv: PtrInt;
   PartResult: TPair<PT, Boolean>;
 begin
   while True do begin
@@ -542,23 +542,25 @@ begin
         Exit();
       end;
       if LSize >= INSERTION_SORT_THRESHOLD then begin
-        Swap(Start, Start + LSize div 4);
-        Swap(PivotPos - 1, PivotPos - LSize div 4);
+        LSizeDiv := LSize div 4;
+        Swap(Start, Start + LSizeDiv);
+        Swap(PivotPos - 1, PivotPos - LSizeDiv);
         if LSize > NINTHER_THRESHOLD then begin
-          Swap(Start + 1, Start + (LSize div 4 + 1));
-          Swap(Start + 2, Start + (LSize div 4 + 2));
-          Swap(PivotPos - 2, PivotPos - (LSize div 4 + 1));
-          Swap(PivotPos - 3, PivotPos - (LSize div 4 + 2));
+          Swap(Start + 1, Start + (LSizeDiv + 1));
+          Swap(Start + 2, Start + (LSizeDiv + 2));
+          Swap(PivotPos - 2, PivotPos - (LSizeDiv + 1));
+          Swap(PivotPos - 3, PivotPos - (LSizeDiv + 2));
         end;
       end;
       if RSize >= INSERTION_SORT_THRESHOLD then begin
-        Swap(PivotPos + 1, PivotPos + (1 + RSize div 4));
-        Swap(Finish - 1, Finish - RSize div 4);
+        RSizeDiv := RSize div 4;
+        Swap(PivotPos + 1, PivotPos + (1 + RSizeDiv));
+        Swap(Finish - 1, Finish - RSizeDiv);
         if RSize > NINTHER_THRESHOLD then begin
-          Swap(PivotPos + 2, PivotPos + (2 + RSize div 4));
-          Swap(PivotPos + 3, PivotPos + (3 + RSize div 4));
-          Swap(Finish - 2, Finish - (1 + RSize div 4));
-          Swap(Finish - 3, Finish - (2 + RSize div 4));
+          Swap(PivotPos + 2, PivotPos + (2 + RSizeDiv));
+          Swap(PivotPos + 3, PivotPos + (3 + RSizeDiv));
+          Swap(Finish - 2, Finish - (1 + RSizeDiv));
+          Swap(Finish - 3, Finish - (2 + RSizeDiv));
         end;
       end;
     end else begin
