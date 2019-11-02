@@ -250,7 +250,7 @@ begin
     I := 0;
     while I < Num do begin
       Swap(First + OffsetsL[I], Last - OffsetsR[I]);
-      Inc(I);
+      I += 1;
     end;
   end else if Num > 0 then begin
     L := First + OffsetsL[0];
