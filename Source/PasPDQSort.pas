@@ -43,8 +43,8 @@ type
   strict private
     class procedure Swap(const L, R: PT); static; inline;
     class procedure Sort3(const A, B, C: PT; const IsLess: TIsLess); static; inline;
-    class procedure InsertionSort(const Start, Finish: PT; const IsLess: TIsLess); static;
-    class procedure UnguardedInsertionSort(const Start, Finish: PT; const IsLess: TIsLess); static;
+    class procedure InsertionSort(const Start, Finish: PT; const IsLess: TIsLess); static; inline;
+    class procedure UnguardedInsertionSort(const Start, Finish: PT; const IsLess: TIsLess); static; inline;
     class function PartialInsertionSort(const Start, Finish: PT; const IsLess: TIsLess): Boolean; static;
     class procedure HeapSort(const Start, Finish: PT; const IsLess: TIsLess); static;
     class procedure SwapOffsets(const First, Last: PT;
