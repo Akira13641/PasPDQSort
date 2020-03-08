@@ -24,11 +24,13 @@ begin
   // sort it!
   specialize TPDQSorter<Int32>.Sort(A);
 
-  // Note: This implementation requires that the type being sorted
+  // Note: This implementation of the algorithm requires that the type being sorted
   // (that is, the one `TPDQSorter` is specialized with) has an existing
-  // overload of the "less than" operator for it. In the above case, "less than"
-  // happens to be built in to the language for `Int32`, but user-defined custom
-  // implementations of the operator for custom types will also work fine.
+  // implementation of the "less than" operator for it, and will fail to compile
+  // if handed something for which that is not the case.
+
+  // In the above example, "less than" happens to be built in to the language for `Int32`,
+  // but user-defined custom implementations of the operator for custom types will also work fine.
 end.
 ```
 
