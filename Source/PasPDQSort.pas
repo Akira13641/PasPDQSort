@@ -9,9 +9,9 @@ unit PasPDQSort;
 interface
 
 const
-  PARTIAL_INSERTION_SORT_LIMIT = 12;
-  INSERTION_SORT_THRESHOLD = 32;
-  BLOCK_SIZE = 128;
+  PARTIAL_INSERTION_SORT_LIMIT = 8;
+  INSERTION_SORT_THRESHOLD = 24;
+  BLOCK_SIZE = 64;
   CACHE_LINE_SIZE = 64;
   NINTHER_THRESHOLD = 128;
 
@@ -45,7 +45,7 @@ type
     class procedure InsertionSort(const Start, Finish: PT); static; inline;
     class procedure UnguardedInsertionSort(const Start, Finish: PT); static; inline;
     class function PartialInsertionSort(const Start, Finish: PT): Boolean; static; inline;
-    class procedure HeapSort(const Start: PT; const Count: PtrUInt); static;
+    class procedure HeapSort(const Start, Finish: PT); static;
     class procedure SwapOffsets(const First, Last: PT;
                                 const OffsetsL, OffsetsR: PByte;
                                 const Num: PtrUInt;
@@ -187,48 +187,34 @@ begin
   Result := True;
 end;
 
-class procedure TPDQSorter<T>.HeapSort(const Start: PT; const Count: PtrUInt);
+class procedure TPDQSorter<T>.HeapSort(const Start, Finish: PT);
 var
-  HeapSize: PtrUInt;
-  Tmp: T;
+  I, OuterLen: PtrUInt;
 
-  procedure Heapify(I: PtrUInt);
-  label
-    Again;
-  var
-    L, R, Largest: PtrUInt;
+  procedure SiftDown(const Start2: PT; const InnerLen: PtrUInt; Node: PtrUInt); inline;
+  var Left, Right, Greater: PtrUInt;
   begin
-again:
-    L := 2 * I + 1;
-    R := 2 * I + 2;
-    if (L < HeapSize) and (not ((Start + L)^ < (Start + I)^)) then
-      Largest := L
-    else
-      Largest := I;
-    if (R < HeapSize) and (not ((Start + R)^ < (Start + Largest)^)) then
-      Largest := R;
-    if Largest <> I then begin
-      Tmp := (Start + I)^;
-      (Start + I)^ := (Start + Largest)^;
-      (Start + Largest)^ := Tmp;
-      I := Largest;
-      goto Again;
+    while True do begin
+      Left := 2 * Node + 1;
+      Right := 2 * Node + 2;
+      if (Right < InnerLen) and (Start2[Left] < Start2[Right]) then
+        Greater := Right
+      else
+        Greater := Left;
+      if (Greater >= InnerLen) or not (Start2[Node] < Start2[Greater]) then
+        Break;
+      Swap(Start2 + Node, Start2 + Greater);
+      Node := Greater;
     end;
   end;
 
-var
-  I: PtrUInt;
 begin
-  HeapSize := Count;
-  for I := ((Count - 1) - 1) div 2 downto 0 do
-    Heapify(I);
-  for I := Count - 1 downto 1 do
-  begin
-    Tmp := Start^;
-    Start^ := (Start + I)^;
-    (Start + I)^ := Tmp;
-    Dec(HeapSize);
-    Heapify(0);
+  OuterLen := Finish - Start;
+  for I := OuterLen div 2 - 1 downto 0 do
+    SiftDown(Start, OuterLen, I);
+  for I := OuterLen - 1 downto 1 do begin
+    Swap(Start, Start + I);
+    SiftDown(Start, I, 0);
   end;
 end;
 
@@ -495,7 +481,7 @@ begin
     RSize := Finish - (PivotPos + 1);
     if (LSize < Size div 8) or (RSize < Size div 8) then begin
       if (BadAllowed - 1) = 0 then begin
-        HeapSort(Start, Finish - Start);
+        HeapSort(Start, Finish);
         Exit();
       end;
       if LSize >= INSERTION_SORT_THRESHOLD then begin
