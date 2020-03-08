@@ -29,7 +29,7 @@ begin
   // implementation of the "less than" operator for it, and will fail to compile
   // if handed something for which that is not the case.
 
-  // In the above example, "less than" happens to be built in to the language for `Int32`,
+  // In the above example, "less than" happens to be built into the language for `Int32`,
   // but user-defined custom implementations of the operator for custom types will also work fine.
 end.
 ```
