@@ -1,5 +1,7 @@
 # PasPDQSort
-This is a direct translation of Orson Peters' [PDQSort](https://github.com/orlp/pdqsort) algorithm from C++ to Free Pascal.
+This is a direct translation of Orson Peters' [PDQSort](https://github.com/orlp/pdqsort) algorithm from C++ to Pascal,
+with one difference in that the internally-used-in-some-cases HeapSort algorithm is a translation of the one found in Stjepan Glavina's
+[Rust implementation](https://github.com/stjepang/pdqsort) of PDQSort.
 
 Basic usage (in the ObjFPC syntax mode) is as follows:
 
