@@ -9,6 +9,7 @@ type
   TVec4 = record
     X, Y, Z, W: Double;
     class function Create(const IX, IY, IZ, IW: Double): TVec4; static; inline;
+    class operator LessThan(constref A, B: TVec4): Boolean; inline;
   end;
 
   class function TVec4.Create(const IX, IY, IZ, IW: Double): TVec4;
@@ -21,12 +22,9 @@ type
     end;
   end;
 
-  function Vec4Less(constref A, B: TVec4): Boolean;
-  var ASum, BSum: Double;
+  class operator TVec4.LessThan(constref A, B: TVec4): Boolean;
   begin
-    with A do ASum := X + Y + Z + W;
-    with B do BSum := X + Y + Z + W;
-    Result := ASum < BSum;
+    Result := A.X + A.Y + A.Z + A.W < B.X + B.Y + B.Z + B.W;
   end;
 
   function Vec4OrderTyped(constref A, B: TVec4): Int32;
@@ -61,7 +59,7 @@ begin
   for I := 0 to 24999999 do A[I] := TVec4.Create(RandomRange(1, 50000001), RandomRange(1, 50000001),
                                                  RandomRange(1, 50000001), RandomRange(1, 50000001));
   T1 := Now();
-  TPDQSorter<TVec4>.Sort(A, Vec4Less);
+  TPDQSorter<TVec4>.Sort(A);
   WriteLn('PDQSort: ', MillisecondsBetween(Now(), T1) / 1000 : 0 : 4);
   SetLength(A, 0);
 

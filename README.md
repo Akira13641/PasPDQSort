@@ -10,11 +10,6 @@ program Example;
 
 uses Math, PasPDQSort;
 
-function Int32LessThan(constref A, B: Int32): Boolean;
-begin
-  Result := A < B;
-end;
-
 var
   I: PtrInt;
   A: array of Int32;
@@ -27,7 +22,13 @@ begin
     A[I] := RandomRange(1, 1001);
 
   // sort it!
-  specialize TPDQSorter<Int32>.Sort(A, @Int32LessThan);
+  specialize TPDQSorter<Int32>.Sort(A);
+
+  // Note: This implementation requires that the type being sorted
+  // (that is, the one `TPDQSorter` is specialized with) has an existing
+  // overload of the "less than" operator for it. In the above case, "less than"
+  // happens to be built in to the language for `Int32`, but user-defined custom
+  // implementations of the operator for custom types will also work fine.
 end.
 ```
 
